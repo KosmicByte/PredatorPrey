@@ -36,6 +36,8 @@ All parameters are positive real numbers.
 - **With both**, the populations oscillate. Prey grow, predators feed and multiply, prey decline, predators starve, and the cycle repeats. Predator peaks lag behind prey peaks.
 - **Equilibrium:** the populations stay constant at $x^* = \gamma / \delta$ and $y^* = \alpha / \beta$. Any other starting point traces a closed orbit around this equilibrium in the phase plane.
 
+For the maths behind these results (equilibria, stability, the conserved quantity and the oscillation period), see [docs/theory.md](docs/theory.md).
+
 ### Key assumptions and limits
 
 - **Assumptions:** unlimited food for the prey, a constant environment, and interaction rates proportional to both populations. [[1](https://sail.usc.edu/~lgoldste/ArtPhon/Slides/lotka-volterramodel.pdf), [2](https://www.sciencedirect.com/science/article/pii/S2352914817301879)]
@@ -47,18 +49,22 @@ All parameters are positive real numbers.
 - Solves it numerically with `scipy.integrate.solve_ivp`
 - Plots both populations over time
 - Plots the phase portrait (predators vs. prey)
-- Saves each run to `results/` with its conditions in the file name
+- Saves each run to `results/`, with every parameter and initial condition in the file name
 
 ## Project structure
 
 ```
 PredatorPrey/
 ├── src/
-│   └── model.py        # equations, solver and plots
-├── tests/
-│   └── test_model.py   # unit tests (pytest)
-├── results/            # saved plots
-├── docs/               # notes
+│   ├── model.py        # entry point: sets parameters, runs the solver, plots and saves
+│   ├── solver.py       # the equations and the solve() wrapper around solve_ivp
+│   ├── vis.py          # plot_results(): time series and phase portrait
+│   └── utils.py        # make_filename(): builds result file names from the run settings
+├── tests/              # unit tests (pytest)
+├── results/            # saved plots (generated, not tracked by git)
+├── docs/
+│   ├── theory.md       # equilibria, stability, conserved quantity, period
+│   └── architecture.md # how the modules fit together and how to extend them
 ├── pyproject.toml      # project metadata and dependencies
 ├── uv.lock             # locked dependency versions
 └── README.md
@@ -69,10 +75,10 @@ PredatorPrey/
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.12+.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/KosmicByte/PredatorPrey.git
 cd PredatorPrey
 uv sync                 # creates .venv and installs dependencies
-uv run src/model.py     # runs the simulation and shows the plots
+uv run src/model.py     # runs the simulation, shows the plots and saves them to results/
 uv run pytest           # runs the tests
 ```
 
@@ -81,10 +87,21 @@ uv run pytest           # runs the tests
 Edit the conditions in `src/model.py`:
 
 ```python
-params = (1, 0.1, 0.075, 1.5)     # alpha, beta, delta, gamma
+params = {"alpha": 1, "beta": 0.1, "delta": 0.075, "gamma": 1.5}
 initial_state = [10, 5]           # initial prey, initial predators
 t_span = (0, 50)                  # start and end time
 ```
+
+### Output
+
+Each run saves a PNG to `results/`. The file name records every setting, so different runs never overwrite each other:
+
+```
+results/lv_a1_b0.1_d0.075_g1.5_x10_y5_t50.png
+          α   β     δ      γ    x₀  y₀  t_end
+```
+
+The `results/` folder is listed in `.gitignore`. It is created automatically on the first run.
 
 ## Dependencies
 
