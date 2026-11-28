@@ -28,4 +28,4 @@ Thumbs.db
 # Interactive plots are large and regenerate on every run
 results/*.html
 # Uncomment to ignore all generated figures too:
-# results/
+results/
